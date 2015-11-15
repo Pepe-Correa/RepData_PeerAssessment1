@@ -1,28 +1,23 @@
-
 ---
 title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-  keep_md: true
+output: html_document
 ---
 
 ------
 
 ## Loading and preprocessing the data
 
-```{r, echo = FALSE, results = "hide"}
-options(scipen = 999) # Disable scientific notation
-Sys.setlocale("LC_ALL","English") # Set english for outputs
-setwd("C:/Users/Pepe/Desktop/Peer Assessment 1") # My working directory
-```
+
 
 1. Loading the data
-```{r}
+
+```r
 repdata <- read.csv("activity.csv")
 ```
 
 2. Transforming "date" variable to R `'Date'` class
-```{r}
+
+```r
 repdata$date <- as.Date(repdata$date, format = "%Y-%m-%d")
 ```
 
@@ -32,12 +27,14 @@ repdata$date <- as.Date(repdata$date, format = "%Y-%m-%d")
 
 1. Histogram of the total number of steps taken each day
 + **First**: calculating the **mean of total number of steps per day** (using `aggregate` function)
-```{r}
+
+```r
 steps_per_day <- aggregate(steps ~ date, data = repdata, FUN = sum)
 ```
 
 + **Second**: histogram
-```{r}
+
+```r
 hist(
        steps_per_day$steps,
        main = "Histogram", 
@@ -45,12 +42,15 @@ hist(
 )
 ```
 
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
+
 2. Reporting the **mean** and **median** of total number of steps per day
-```{r}
+
+```r
 Mean <- mean(steps_per_day$steps)
 Median <- median(steps_per_day$steps)
 ```
-+ The **mean** and **median** of total number of steps taken per day are `r round(Mean, 3)` and `r round(Median, 3)`, respectively.
++ The **mean** and **median** of total number of steps taken per day are 10766.189 and 10765, respectively.
 
 ------
 
@@ -58,7 +58,8 @@ Median <- median(steps_per_day$steps)
 
 1. Time series plot.
 + **First**: Calculating the average daily activity pattern
-```{r}
+
+```r
 daily_activity_pattern <- aggregate(
        steps ~ interval, 
        data = repdata, 
@@ -67,7 +68,8 @@ daily_activity_pattern <- aggregate(
 ```
 
 + **Second**: The plot
-```{r}
+
+```r
 plot(
        steps ~ interval, 
        data = daily_activity_pattern, 
@@ -76,9 +78,17 @@ plot(
 )
 ```
 
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
+
 2. The 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps is:
-```{r}
+
+```r
 daily_activity_pattern[which.max(daily_activity_pattern$steps), ]
+```
+
+```
+##     interval    steps
+## 104      835 206.1698
 ```
 
 
@@ -87,14 +97,20 @@ daily_activity_pattern[which.max(daily_activity_pattern$steps), ]
 ## Imputing missing values
 
 1. Total number of missing values in the dataset (i.e. the total number of rows with NAs):
-```{r}
+
+```r
 sum(!complete.cases(repdata))
+```
+
+```
+## [1] 2304
 ```
 
 2. Strategy for filling in all of the missing values in the dataset: the mean value for a 5-minute interval was used.
 
 3. New dataset (`repdata_filled`) with the missing data filled in.
-```{r}
+
+```r
 repdata_filled <- data.frame() # empty data frame
 intervals <- unique(repdata$interval) # 5-minute intervals
 for(i in 1:length(intervals)){
@@ -109,12 +125,14 @@ for(i in 1:length(intervals)){
 4. Histogram of the total number of steps per day and mean and median of total number of steps taken per day.
 
 + **First**: calculating the **mean of total number of steps per day** 
-```{r}
+
+```r
 steps_per_day <- aggregate(steps ~ date, data = repdata_filled, FUN = sum)
 ```
 
 + **Second**: histogram
-```{r}
+
+```r
 hist(
        steps_per_day$steps,
        main = "Histogram", 
@@ -122,13 +140,16 @@ hist(
 )
 ```
 
+![plot of chunk unnamed-chunk-13](figure/unnamed-chunk-13-1.png) 
+
 + **Third**: reporting the **mean** and **median** of total number of steps per day
-```{r}
+
+```r
 Mean <- mean(steps_per_day$steps)
 Median <- median(steps_per_day$steps)
 ```
 
-The **mean** and **median** of total number of steps taken per day are `r round(Mean, 3)` and `r round(Median, 3)`, respectively. Even though the imputation strategy did not have an impact on the mean value, the median value was affected, which implies an effect on the variation and distribution of data.
+The **mean** and **median** of total number of steps taken per day are 10766.189 and 10766.189, respectively. Even though the imputation strategy did not have an impact on the mean value, the median value was affected, which implies an effect on the variation and distribution of data.
 
 ------
 
@@ -137,7 +158,8 @@ The **mean** and **median** of total number of steps taken per day are `r round(
 1. Creating a new factor variable with two levels -- "weekday" and "weekend" using the filled-in missing dataset.
 
 + **First**: a function called `days` is created. This function returns "weekend" if date is 'saturday' or 'sunday'. Otherwise, it returns "weekday"
-```{r}
+
+```r
 days <- function(date){
        # date: an object of class "Date".
        ifelse(
@@ -149,14 +171,16 @@ days <- function(date){
 ```
 
 + **Second**: using the `days` function to create the new **factor** variable
-```{r}
+
+```r
 repdata_filled$weekday <- as.factor(days(repdata_filled$date))
 ```
 
 2. Panel plot containing a time series plot of the 5-minute interval and the average number of steps, averaged across all weekday days or weekend days.
 
 + **First**: calculating the average number of steps per interval and day class (weekday or weekend):
-```{r}
+
+```r
 daily_activity_pattern <- aggregate(
        steps ~ interval*weekday, 
        data = repdata_filled, 
@@ -165,7 +189,8 @@ daily_activity_pattern <- aggregate(
 ```
 
 + **Second**: time series plot.
-```{r}
+
+```r
 library(lattice) 
 xyplot(
        steps ~ interval | weekday, 
@@ -175,3 +200,5 @@ xyplot(
        layout = c(1, 2)
 )
 ```
+
+![plot of chunk unnamed-chunk-18](figure/unnamed-chunk-18-1.png) 
